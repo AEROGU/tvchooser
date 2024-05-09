@@ -17,7 +17,7 @@ To add this package to your project:
 go get github.com/aerogu/tvchooser
 ```
 
-Get the library and call FileChooser or DirectoryChooser passing your tview `app` as parameter to pause it while the chooser interface is in use, or pass `nil` if you are building a non GUI console application but want the user to select a file or directory at some point.
+Get the library and call FileChooser or DirectoryChooser passing your tview `app` as parameter to pause it while the chooser interface is in use, or pass `nil` if you are building a non GUI console application but want the user to select a file or directory at some point, and `true` if you want to show hidden files. 
 
 ## Hello World
 
@@ -32,7 +32,7 @@ import (
 )
 
 func main() {
-	path := tvchooser.FileChooser(nil)
+	path := tvchooser.FileChooser(nil, false)
 	fmt.Print("RUTA: " + path)
 }
 ```
@@ -51,11 +51,65 @@ import (
 
 func main() {
 	tvclang.SetTranslations(tvclang.LangSpanish())
-	path := tvchooser.FileChooser(nil)
+	path := tvchooser.FileChooser(nil, false)
 
 	fmt.Print("RUTA: " + path)
 }
 ```
+
+### Using it with your application:
+
+```go
+package main
+
+import (
+	"github.com/aerogu/tvchooser"
+	"github.com/aerogu/tvchooser/tvclang"
+	"github.com/gdamore/tcell/v2"
+	"github.com/rivo/tview"
+)
+
+func main() {
+	// Set your preferred language (If is enlish you can remove this line because it is the default)
+	tvclang.SetTranslations(tvclang.LangSpanish())
+	// tvclang.SetTranslations(tvclang.LangSpanish())
+
+	app := tview.NewApplication().EnableMouse(true)
+	panel := tview.NewFlex().SetDirection(tview.FlexRow)
+	text := tview.NewTextView().SetTextAlign(tview.AlignCenter)
+	text.SetText("Select a file or directory")
+
+	panel.AddItem(text, 0, 1, false)
+
+	form := tview.NewForm()
+	form.AddButton("File", func() {
+		path := tvchooser.FileChooser(app, false)
+		if path == "" {
+			text.SetText("No file selected")
+		} else {
+			text.SetText(path)
+		}
+	})
+	form.AddButton("Directory", func() {
+		path := tvchooser.DirectoryChooser(app, false)
+		if path == "" {
+			text.SetText("No directory selected")
+		} else {
+			text.SetText(path)
+		}
+	})
+
+	panel.SetBackgroundColor(tcell.ColorRed)
+	panel.AddItem(form, 4, 0, false)
+
+	app.SetRoot(panel, true)
+	if err := app.Run(); err != nil {
+		panic(err)
+	}
+}
+```
+
+
 
 ## Dependencies
 

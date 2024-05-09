@@ -34,6 +34,12 @@ func (fv *fileView) updatePath(newPath string) {
 	if err == nil {
 		for _, file := range files {
 			if !file.IsDir() {
+
+				firstFileCharacter := file.Name()[0]
+				if !fv.showHidden && (firstFileCharacter == '.' || firstFileCharacter == '~' || firstFileCharacter == '$') {
+					continue
+				}
+
 				fileInfo, err := file.Info()
 
 				if err == nil {

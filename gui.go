@@ -1,11 +1,17 @@
 package tvchooser
 
 import (
+	"os"
+
 	"github.com/aerogu/tvchooser/tvclang"
 	"github.com/rivo/tview"
 )
 
-func FileChooser(parentApp *tview.Application) string {
+// FileChooser let the user selects a file and returns the selected file path.
+//
+// Takes in a parent application to be paused or nil, and a boolean showHidden to determine if hidden files should be shown.
+// Returns a string representing the selected file path.
+func FileChooser(parentApp *tview.Application, showHidden bool) string {
 	selectedPath := ""
 
 	app := tview.NewApplication()
@@ -18,7 +24,7 @@ func FileChooser(parentApp *tview.Application) string {
 	selectedPathView := tview.NewTextView()
 	selectedPathView.SetBorder(true)
 
-	dirView := newDirectoryView(false, selectedPathView, nil)
+	dirView := newDirectoryView(showHidden, selectedPathView, nil)
 	fileView := newFileView("", dirView.showHidden, selectedPathView, dirView)
 	dirView.onSelectedFunc = func(node *tview.TreeNode) {
 		fileView.updatePath(node.GetReference().(nodeInfo).Path)
@@ -35,7 +41,12 @@ func FileChooser(parentApp *tview.Application) string {
 	})
 	// Accept button
 	buttonsView.AddButton(tvclang.GetTranslations().Accept, func() {
-		selectedPath = dirView.selectedPath + fileView.selectedFileName
+		selectedPath = selectedPathView.GetText(false)
+		//if selected path ends with PathSeparator, is a directory, so set selected path to ""
+		if len(selectedPath) > 0 && selectedPath[len(selectedPath)-1] == os.PathSeparator {
+			selectedPath = ""
+		}
+		// selectedPath = dirView.selectedPath + fileView.selectedFileName
 		app.Stop()
 	})
 
@@ -56,7 +67,11 @@ func FileChooser(parentApp *tview.Application) string {
 	return selectedPath
 }
 
-func DirectoryChooser(parentApp *tview.Application) string {
+// DirectoryChooser selects a directory using a GUI and returns the selected directory path.
+//
+// It takes in a parent application to be paused or nil, and a boolean showHidden to determine if hidden directories should be shown.
+// It returns a string representing the selected directory path.
+func DirectoryChooser(parentApp *tview.Application, showHidden bool) string {
 	selectedPath := ""
 
 	app := tview.NewApplication()
@@ -69,7 +84,7 @@ func DirectoryChooser(parentApp *tview.Application) string {
 	selectedPathView := tview.NewTextView()
 	selectedPathView.SetBorder(true)
 
-	dirView := newDirectoryView(false, selectedPathView, nil)
+	dirView := newDirectoryView(showHidden, selectedPathView, nil)
 	selectionPanel := tview.NewFlex().SetDirection(tview.FlexColumn).AddItem(dirView.dirView, 0, 2, true)
 
 	buttonsView := tview.NewForm()

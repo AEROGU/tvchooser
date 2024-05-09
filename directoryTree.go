@@ -58,9 +58,6 @@ func (dv *directoryView) addChildDirectories(target *tview.TreeNode, path string
 		}
 
 		firstDirectoryCharacter := file.Name()[0]
-		// if !dv.showHidden && (InSlice(firstDirectoryCharacter, []byte{'.', '~', '$'})) {
-		// 	return
-		// }
 		if !dv.showHidden && (firstDirectoryCharacter == '.' || firstDirectoryCharacter == '~' || firstDirectoryCharacter == '$') {
 			continue
 		}
