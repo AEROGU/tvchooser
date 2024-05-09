@@ -8,6 +8,7 @@ TView Chooser is a simple directory and file chooser GUI GOlang library built wi
 - Navigate through directories
 - Select files and directories
 - Windows support
+- It can show hidden files
 
 ## Usage
 
@@ -37,7 +38,7 @@ func main() {
 }
 ```
 
-Spanish language is included too, but you can set you own by filling your own `tvclang.Texts` object and set it with `tvclang.SetTranslations(yourTranslations)`
+Spanish language is included too, but you can set your own language by filling your own `tvclang.Texts` object and set it with `tvclang.SetTranslations(yourTranslations)`
 
 ```go
 package main
