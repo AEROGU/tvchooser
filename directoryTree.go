@@ -12,6 +12,11 @@ import (
 	"github.com/rivo/tview"
 )
 
+const (
+	EXPANDED_PREFIX  = "▼ "
+	COLLAPSED_PREFIX = "► "
+)
+
 type nodeInfo struct {
 	Path     string
 	IsRoot   bool
@@ -27,6 +32,8 @@ type directoryView struct {
 	textViewToUpdate *tview.TextView
 	onSelectedFunc   func(node *tview.TreeNode)
 }
+
+var fastAccessPaths []string
 
 // A helper function which adds the directories of the given path
 // to the given target node.
@@ -62,7 +69,7 @@ func (dv *directoryView) addChildDirectories(target *tview.TreeNode, path string
 			continue
 		}
 
-		node := tview.NewTreeNode("► " + file.Name())
+		node := tview.NewTreeNode(COLLAPSED_PREFIX + file.Name())
 		node.SetReference(nodeInfo{
 			Path:     filepath.Join(path, file.Name()),
 			IsRoot:   false,
@@ -135,10 +142,10 @@ func (dv *directoryView) onNodeSelected(node *tview.TreeNode) {
 
 		// If no directories left, erase the arrot at the beginning. (Only for not custom directories)
 		if len(node.GetChildren()) == 0 && !info.IsCustom {
-			if strings.HasPrefix(txt, "► ") {
-				txt = strings.TrimLeft(txt, "► ")
+			if strings.HasPrefix(txt, COLLAPSED_PREFIX) {
+				txt = strings.TrimLeft(txt, COLLAPSED_PREFIX)
 			} else {
-				txt = strings.TrimLeft(txt, "▼ ")
+				txt = strings.TrimLeft(txt, EXPANDED_PREFIX)
 			}
 			node.SetText("  " + txt)
 
@@ -153,16 +160,16 @@ func (dv *directoryView) onNodeSelected(node *tview.TreeNode) {
 		node.SetExpanded(!node.IsExpanded())
 	}
 
-	if strings.HasPrefix(txt, "► ") {
-		txt = strings.TrimLeft(txt, "► ")
+	if strings.HasPrefix(txt, COLLAPSED_PREFIX) {
+		txt = strings.TrimLeft(txt, COLLAPSED_PREFIX)
 	} else {
-		txt = strings.TrimLeft(txt, "▼ ")
+		txt = strings.TrimLeft(txt, EXPANDED_PREFIX)
 	}
 
 	if node.IsExpanded() {
-		node.SetText("▼ " + txt)
+		node.SetText(EXPANDED_PREFIX + txt)
 	} else {
-		node.SetText("► " + txt)
+		node.SetText(COLLAPSED_PREFIX + txt)
 	}
 }
 
@@ -177,28 +184,29 @@ func newDirectoryView(showHidden bool, textViewToUpdate *tview.TextView, onSelec
 	tree := tview.NewTreeView()
 
 	// Add rootNode node.
-	rootNode := tview.NewTreeNode("▼ " + tvclang.GetTranslations().ThisPC).SetColor(tcell.ColorWhite).SetIndent(0)
+	rootNode := tview.NewTreeNode(EXPANDED_PREFIX + tvclang.GetTranslations().ThisPC).SetColor(tcell.ColorWhite).SetIndent(0)
 	rootNode.SetReference(nodeInfo{
 		Path:     "",
 		IsRoot:   true,
 		IsCustom: true,
 	})
 
+	// Add favorites node if any.
+
 	// Add userprofile node.
 	userHomeDir, _ := os.UserHomeDir()
-	locationsNode := tview.NewTreeNode("► " + tvclang.GetTranslations().HomeDir).SetReference(nodeInfo{
+	addChildNode(rootNode, tvclang.GetTranslations().HomeDir, false, nodeInfo{
 		Path:     userHomeDir,
 		IsRoot:   true,
 		IsCustom: false,
 	})
-	rootNode.AddChild(locationsNode)
 
-	devicesNode := tview.NewTreeNode("▼ " + tvclang.GetTranslations().Devices).SetReference(nodeInfo{
+	// Add devices node.
+	devicesNode := addChildNode(rootNode, tvclang.GetTranslations().Devices, true, nodeInfo{
 		Path:     "",
 		IsRoot:   true,
 		IsCustom: false,
 	})
-	rootNode.AddChild(devicesNode)
 
 	if runtime.GOOS == "windows" {
 		devices, err := mounted.GetWindowsDriveLetters()
@@ -208,14 +216,12 @@ func newDirectoryView(showHidden bool, textViewToUpdate *tview.TextView, onSelec
 		} else {
 			for _, drive := range devices {
 				driveRoot := drive + ":" + string(os.PathSeparator)
-				driveNode := tview.NewTreeNode("► " + driveRoot).SetReference(nodeInfo{
+				addChildNode(devicesNode, driveRoot, false, nodeInfo{
 					Path:     driveRoot,
 					IsRoot:   true,
 					IsCustom: false,
 				})
-				devicesNode.AddChild(driveNode)
-				// Add child nodes to the drive node.
-				// add(devicesNode, driveRoot)
+
 			}
 		}
 	}
@@ -233,4 +239,17 @@ func newDirectoryView(showHidden bool, textViewToUpdate *tview.TextView, onSelec
 	tree.SetSelectedFunc(dv.onNodeSelected)
 
 	return dv
+}
+
+func addChildNode(rootNode *tview.TreeNode, nodeName string, expanded bool, info nodeInfo) *tview.TreeNode {
+	var prefix string
+	if expanded {
+		prefix = EXPANDED_PREFIX
+	} else {
+		prefix = COLLAPSED_PREFIX
+	}
+
+	newNode := tview.NewTreeNode(prefix + nodeName).SetReference(info)
+	rootNode.AddChild(newNode)
+	return newNode
 }
