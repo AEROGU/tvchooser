@@ -6,8 +6,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/aerogu/tvchooser/mounted"
-	"github.com/aerogu/tvchooser/tvclang"
+	"github.com/AEROGU/tvchooser/mounted"
+	"github.com/AEROGU/tvchooser/tvclang"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )

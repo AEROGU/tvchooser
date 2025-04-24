@@ -3,7 +3,7 @@ package tvchooser
 import (
 	"os"
 
-	"github.com/aerogu/tvchooser/tvclang"
+	"github.com/AEROGU/tvchooser/tvclang"
 	"github.com/rivo/tview"
 )
 

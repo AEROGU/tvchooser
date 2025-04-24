@@ -15,7 +15,7 @@ TView Chooser is a simple directory and file chooser GUI GOlang library built wi
 To add this package to your project:
 
 ```
-go get github.com/aerogu/tvchooser
+go get github.com/AEROGU/tvchooser
 ```
 
 Get the library and call FileChooser or DirectoryChooser passing your tview `app` as parameter to pause it while the chooser interface is in use, or pass `nil` if you are building a non GUI console application but want the user to select a file or directory at some point, and `true` if you want to show hidden files. 
@@ -29,7 +29,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/aerogu/tvchooser"
+	"github.com/AEROGU/tvchooser"
 )
 
 func main() {
@@ -46,8 +46,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/aerogu/tvchooser"
-	"github.com/aerogu/tvchooser/tvclang"
+	"github.com/AEROGU/tvchooser"
+	"github.com/AEROGU/tvchooser/tvclang"
 )
 
 func main() {
@@ -64,8 +64,8 @@ func main() {
 package main
 
 import (
-	"github.com/aerogu/tvchooser"
-	"github.com/aerogu/tvchooser/tvclang"
+	"github.com/AEROGU/tvchooser"
+	"github.com/AEROGU/tvchooser/tvclang"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
