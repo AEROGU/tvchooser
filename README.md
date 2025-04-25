@@ -5,10 +5,12 @@ TView Chooser is a simple directory and file chooser GUI GOlang library built wi
 ![ScreenShot](https://raw.githubusercontent.com/AEROGU/tvchooser/main/ScreenShot.png)
 
 ## Features
+
 - Navigate through directories
 - Select files and directories
-- Windows support
+- Windows support (It should also work fine on Linux and other OS)
 - It can show hidden files
+- You can set custom directories and display them with another name
 
 ## Usage
 
@@ -18,7 +20,7 @@ To add this package to your project:
 go get github.com/AEROGU/tvchooser
 ```
 
-Get the library and call FileChooser or DirectoryChooser passing your tview `app` as parameter to pause it while the chooser interface is in use, or pass `nil` if you are building a non GUI console application but want the user to select a file or directory at some point, and `true` if you want to show hidden files. 
+Get the library and call FileChooser or DirectoryChooser passing your tview `app` as parameter to pause it while the chooser interface is in use, or pass `nil` if you are building a non GUI console application but want the user to select a file or directory at some point, and `true` if you want to show hidden files.
 
 ## Hello World
 
@@ -57,6 +59,43 @@ func main() {
 	fmt.Print("RUTA: " + path)
 }
 ```
+
+### Custom directories
+
+![ScreenShot](https://raw.githubusercontent.com/AEROGU/tvchooser/main/ScreenShot-2.png)
+
+You can add custom directories, and even display them with another name with the syntax "`<path>`|`<name>`" example:
+
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+
+	"github.com/AEROGU/tvchooser"
+)
+
+func main() {
+	curdir, _ := os.Getwd()
+
+	path := tvchooser.FileChooser(nil, false,
+		curdir+"|🏠 Current directory",
+		"D:\\artur\\Music|🎵 Music",
+		"D:\\artur\\Desktop|🖥️ Desktop",
+		"C:\\Users\\Public|📁 Public access",
+		"C:\\Users",
+	)
+	if path == "" {
+		fmt.Println("No file selected")
+		return
+	}
+	fmt.Println(path)
+}
+```
+
+
+
 
 ### Using it with your application:
 
@@ -110,8 +149,6 @@ func main() {
 }
 ```
 
-
-
 ## Dependencies
 
 This package is based on [github.com/rivo/tview](https://github.com/rivo/tview) (and its dependencies) as well as on [github.com/dustin/go-humanize](https://github.com/dustin/go-humanize).
@@ -135,6 +172,7 @@ func LangSpanish() Texts {
 		ThisPC:       "Este PC",
 		HomeDir:      "Inicio",
 		Devices:      "Unidades",
+		Favorites:    "Favoritos",
 	}
 }
 ```

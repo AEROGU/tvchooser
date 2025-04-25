@@ -11,7 +11,7 @@ import (
 //
 // Takes in a parent application to be paused or nil, and a boolean showHidden to determine if hidden files should be shown.
 // Returns a string representing the selected file path.
-func FileChooser(parentApp *tview.Application, showHidden bool) string {
+func FileChooser(parentApp *tview.Application, showHidden bool, fastAccessPaths ...string) string {
 	selectedPath := ""
 
 	app := tview.NewApplication()
@@ -24,7 +24,7 @@ func FileChooser(parentApp *tview.Application, showHidden bool) string {
 	selectedPathView := tview.NewTextView()
 	selectedPathView.SetBorder(true)
 
-	dirView := newDirectoryView(showHidden, selectedPathView, nil)
+	dirView := newDirectoryView(showHidden, selectedPathView, nil, fastAccessPaths)
 	fileView := newFileView("", dirView.showHidden, selectedPathView, dirView)
 	dirView.onSelectedFunc = func(node *tview.TreeNode) {
 		fileView.updatePath(node.GetReference().(nodeInfo).Path)
@@ -71,7 +71,7 @@ func FileChooser(parentApp *tview.Application, showHidden bool) string {
 //
 // It takes in a parent application to be paused or nil, and a boolean showHidden to determine if hidden directories should be shown.
 // It returns a string representing the selected directory path.
-func DirectoryChooser(parentApp *tview.Application, showHidden bool) string {
+func DirectoryChooser(parentApp *tview.Application, showHidden bool, fastAccessPaths ...string) string {
 	selectedPath := ""
 
 	app := tview.NewApplication()
@@ -84,16 +84,18 @@ func DirectoryChooser(parentApp *tview.Application, showHidden bool) string {
 	selectedPathView := tview.NewTextView()
 	selectedPathView.SetBorder(true)
 
-	dirView := newDirectoryView(showHidden, selectedPathView, nil)
+	dirView := newDirectoryView(showHidden, selectedPathView, nil, fastAccessPaths)
 	selectionPanel := tview.NewFlex().SetDirection(tview.FlexColumn).AddItem(dirView.dirView, 0, 2, true)
 
 	buttonsView := tview.NewForm()
 	buttonsView.SetButtonsAlign(tview.AlignRight)
+
 	// Cancel button
 	buttonsView.AddButton(tvclang.GetTranslations().Cancel, func() {
 		selectedPath = ""
 		app.Stop()
 	})
+
 	// Accept button
 	buttonsView.AddButton(tvclang.GetTranslations().Accept, func() {
 		selectedPath = dirView.selectedPath

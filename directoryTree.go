@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	EXPANDED_PREFIX  = "▼ "
-	COLLAPSED_PREFIX = "► "
+	expandedPrefix  = "▼ "
+	collapsedPrefix = "► "
 )
 
 type nodeInfo struct {
@@ -31,9 +31,8 @@ type directoryView struct {
 	showHidden       bool
 	textViewToUpdate *tview.TextView
 	onSelectedFunc   func(node *tview.TreeNode)
+	fastAccessPaths  []string // Paths to be added to the tree view as fast access paths
 }
-
-var fastAccessPaths []string
 
 // A helper function which adds the directories of the given path
 // to the given target node.
@@ -69,7 +68,7 @@ func (dv *directoryView) addChildDirectories(target *tview.TreeNode, path string
 			continue
 		}
 
-		node := tview.NewTreeNode(COLLAPSED_PREFIX + file.Name())
+		node := tview.NewTreeNode(collapsedPrefix + file.Name())
 		node.SetReference(nodeInfo{
 			Path:     filepath.Join(path, file.Name()),
 			IsRoot:   false,
@@ -142,10 +141,10 @@ func (dv *directoryView) onNodeSelected(node *tview.TreeNode) {
 
 		// If no directories left, erase the arrot at the beginning. (Only for not custom directories)
 		if len(node.GetChildren()) == 0 && !info.IsCustom {
-			if strings.HasPrefix(txt, COLLAPSED_PREFIX) {
-				txt = strings.TrimLeft(txt, COLLAPSED_PREFIX)
+			if strings.HasPrefix(txt, collapsedPrefix) {
+				txt = strings.TrimLeft(txt, collapsedPrefix)
 			} else {
-				txt = strings.TrimLeft(txt, EXPANDED_PREFIX)
+				txt = strings.TrimLeft(txt, expandedPrefix)
 			}
 			node.SetText("  " + txt)
 
@@ -160,16 +159,16 @@ func (dv *directoryView) onNodeSelected(node *tview.TreeNode) {
 		node.SetExpanded(!node.IsExpanded())
 	}
 
-	if strings.HasPrefix(txt, COLLAPSED_PREFIX) {
-		txt = strings.TrimLeft(txt, COLLAPSED_PREFIX)
+	if strings.HasPrefix(txt, collapsedPrefix) {
+		txt = strings.TrimLeft(txt, collapsedPrefix)
 	} else {
-		txt = strings.TrimLeft(txt, EXPANDED_PREFIX)
+		txt = strings.TrimLeft(txt, expandedPrefix)
 	}
 
 	if node.IsExpanded() {
-		node.SetText(EXPANDED_PREFIX + txt)
+		node.SetText(expandedPrefix + txt)
 	} else {
-		node.SetText(COLLAPSED_PREFIX + txt)
+		node.SetText(collapsedPrefix + txt)
 	}
 }
 
@@ -180,11 +179,11 @@ func (dv *directoryView) onNodeSelected(node *tview.TreeNode) {
 //
 // Returns:
 // - A pointer to the created directoryView.
-func newDirectoryView(showHidden bool, textViewToUpdate *tview.TextView, onSelectedFunc func(node *tview.TreeNode)) *directoryView {
+func newDirectoryView(showHidden bool, textViewToUpdate *tview.TextView, onSelectedFunc func(node *tview.TreeNode), fastAccessPaths []string) *directoryView {
 	tree := tview.NewTreeView()
 
 	// Add rootNode node.
-	rootNode := tview.NewTreeNode(EXPANDED_PREFIX + tvclang.GetTranslations().ThisPC).SetColor(tcell.ColorWhite).SetIndent(0)
+	rootNode := tview.NewTreeNode(expandedPrefix + tvclang.GetTranslations().ThisPC).SetColor(tcell.ColorWhite).SetIndent(0)
 	rootNode.SetReference(nodeInfo{
 		Path:     "",
 		IsRoot:   true,
@@ -192,6 +191,32 @@ func newDirectoryView(showHidden bool, textViewToUpdate *tview.TextView, onSelec
 	})
 
 	// Add favorites node if any.
+	if len(fastAccessPaths) > 0 {
+		favoritesNode := addChildNode(rootNode, tvclang.GetTranslations().Favorites, true, nodeInfo{
+			Path:     "",
+			IsRoot:   true,
+			IsCustom: true,
+		})
+		for _, path := range fastAccessPaths {
+
+			curFastAccessDirPath, curFastAccessDirName := splitPathAndName(path, '|')
+			if curFastAccessDirPath == "" { // Check if the path is empty (just in case).
+				continue // Skip empty paths.
+			}
+
+			// curFastAccessDirName := filepath.Base(path)
+			// if curFastAccessDirName == "" { // Check if the directory name is empty (just in case).
+			// 	continue // Skip empty directory names.
+			// }
+
+			// Add the path to the favorites node.
+			addChildNode(favoritesNode, curFastAccessDirName, false, nodeInfo{
+				Path:     curFastAccessDirPath,
+				IsRoot:   false,
+				IsCustom: false,
+			})
+		}
+	}
 
 	// Add userprofile node.
 	userHomeDir, _ := os.UserHomeDir()
@@ -205,7 +230,7 @@ func newDirectoryView(showHidden bool, textViewToUpdate *tview.TextView, onSelec
 	devicesNode := addChildNode(rootNode, tvclang.GetTranslations().Devices, true, nodeInfo{
 		Path:     "",
 		IsRoot:   true,
-		IsCustom: false,
+		IsCustom: true,
 	})
 
 	if runtime.GOOS == "windows" {
@@ -233,6 +258,7 @@ func newDirectoryView(showHidden bool, textViewToUpdate *tview.TextView, onSelec
 		showHidden:       showHidden,
 		textViewToUpdate: textViewToUpdate,
 		onSelectedFunc:   onSelectedFunc,
+		fastAccessPaths:  fastAccessPaths,
 	}
 
 	// If a directory was selected, open it.
@@ -244,9 +270,9 @@ func newDirectoryView(showHidden bool, textViewToUpdate *tview.TextView, onSelec
 func addChildNode(rootNode *tview.TreeNode, nodeName string, expanded bool, info nodeInfo) *tview.TreeNode {
 	var prefix string
 	if expanded {
-		prefix = EXPANDED_PREFIX
+		prefix = expandedPrefix
 	} else {
-		prefix = COLLAPSED_PREFIX
+		prefix = collapsedPrefix
 	}
 
 	newNode := tview.NewTreeNode(prefix + nodeName).SetReference(info)

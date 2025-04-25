@@ -10,6 +10,7 @@ func LangEnglish() Texts {
 		ThisPC:       "This PC",
 		HomeDir:      "Home",
 		Devices:      "Devices",
+		Favorites:    "Favorites",
 	}
 }
 
@@ -23,5 +24,6 @@ func LangSpanish() Texts {
 		ThisPC:       "Este PC",
 		HomeDir:      "Inicio",
 		Devices:      "Unidades",
+		Favorites:    "Favoritos",
 	}
 }

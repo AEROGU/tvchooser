@@ -9,6 +9,7 @@ type Texts struct {
 	ThisPC       string
 	HomeDir      string
 	Devices      string
+	Favorites    string
 }
 
 var translations *Texts
