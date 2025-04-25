@@ -83,7 +83,7 @@ func main() {
 		curdir+"|🏠 Current directory",
 		"D:\\artur\\Music|🎵 Music",
 		"D:\\artur\\Desktop|🖥️ Desktop",
-		"C:\\Users\\Public|📁 Public access",
+		"C:\\Users\\Public|📁 |Public access|",
 		"C:\\Users",
 	)
 	if path == "" {
