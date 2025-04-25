@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 )
 
-// splitPathAndName separates a string into a path and a name based on the last occurrence of a separator rune.
+// splitPathAndName separates a string into a path and a name based on the first occurrence of a separator rune.
 // For example, if the string is "D:\\user\\Music|Música" and the separator is '|', it will return "D:\\user\\Music" and "Música".
 // If the separator is not found, it returns the original string as the path and an the base path name (filepath.Base(path)) as the name.
 func splitPathAndName(pathAndName string, separator rune) (path string, name string) {
@@ -13,6 +13,7 @@ func splitPathAndName(pathAndName string, separator rune) (path string, name str
 	for i, r := range pathAndName {
 		if r == separator {
 			lastSeparatorIndex = i
+			break // Stop at the first occurrence of the separator, so the user can also use '|' for cusom directory names.
 		}
 	}
 
